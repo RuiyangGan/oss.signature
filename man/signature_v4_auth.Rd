@@ -16,7 +16,7 @@ signature_v4_auth(
   signed_body = FALSE,
   key = NULL,
   secret = NULL,
-  session_token = NULL,
+  security_token = NULL,
   query = FALSE,
   algorithm = "AWS4-HMAC-SHA256",
   force_credentials = FALSE,
@@ -46,7 +46,7 @@ signature_v4_auth(
 
 \item{secret}{An AWS Secret Access Key. If \code{NULL}, it is retrieved using \code{\link{locate_credentials}}.}
 
-\item{session_token}{Optionally, an AWS Security Token Service (STS) temporary Session Token. This is added automatically as a header to \code{canonical_headers}. See \code{\link{locate_credentials}}.}
+\item{security_token}{Optionally, an AWS Security Token Service (STS) temporary security Token. This is added automatically as a header to \code{canonical_headers}. See \code{\link{locate_credentials}}.}
 
 \item{query}{A logical. Currently ignored.}
 
@@ -75,7 +75,7 @@ A list of class \dQuote{aws_signature_v4}, containing the information needed to 
     \item{SignatureHeader}{A character string containing a complete Authorization header value.}
     \item{AccessKeyId}{A character string containing the access key id identified by \code{\link{locate_credentials}}.}
     \item{SecretAccessKey}{A character string containing the secret access key identified by \code{\link{locate_credentials}}.}
-    \item{SessionToken}{A character string containing the session token identified by \code{\link{locate_credentials}}.}
+    \item{securityToken}{A character string containing the security token identified by \code{\link{locate_credentials}}.}
     \item{Region}{A character string containing the region identified by \code{\link{locate_credentials}}.}
 
 These values can either be used as query parameters in a REST-style API request, or as request headers. If authentication is supplied via query string parameters, the query string should include the following:

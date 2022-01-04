@@ -7,7 +7,7 @@
 locate_credentials(
   key = NULL,
   secret = NULL,
-  session_token = NULL,
+  security_token = NULL,
   region = NULL,
   file = Sys.getenv("AWS_SHARED_CREDENTIALS_FILE", default_credentials_file()),
   profile = NULL,
@@ -20,7 +20,7 @@ locate_credentials(
 
 \item{secret}{An AWS Secret Access Key}
 
-\item{session_token}{Optionally, an AWS Security Token Service (STS) temporary Session Token}
+\item{security_token}{Optionally, an AWS Security Token Service (STS) temporary Session Token}
 
 \item{region}{A character string containing the AWS region for the request. If missing, \dQuote{us-east-1} is assumed.}
 
@@ -39,7 +39,7 @@ Locate AWS credentials from likely sources
 These functions locate values of AWS credentials (access key, secret access key, session token, and region) from likely sources. The order in which these are searched is as follows:
 \enumerate{
   \item user-supplied values passed to the function
-  \item environment variables (\env{AWS_ACCESS_KEY_ID}, \env{AWS_SECRET_ACCESS_KEY}, \env{AWS_DEFAULT_REGION}, and \env{AWS_SESSION_TOKEN})
+  \item environment variables (\env{AWS_ACCESS_KEY_ID}, \env{AWS_SECRET_ACCESS_KEY}, \env{AWS_DEFAULT_REGION}, and \env{AWS_security_token})
   \item an instance role (on the running ECS task from which this function is called) as identified by \code{\link[aws.ec2metadata]{metadata}}, if the aws.ec2metadata package is installed
   \item an IAM instance role (on the running EC2 instance from which this function is called) as identified by \code{\link[aws.ec2metadata]{metadata}}, if the aws.ec2metadata package is installed
   \item a profile in a local credentials dot file in the current working directory, using the profile specified by \env{AWS_PROFILE}

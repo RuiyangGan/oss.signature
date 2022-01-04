@@ -1,4 +1,4 @@
-Package: aws.signature
+Package: oss.signature
 Type: Package
 Title: Amazon Web Services Request Signatures
 Version: 0.6.0
@@ -20,4 +20,4 @@ Suggests:
     aws.ec2metadata (>= 0.1.6)
 URL: https://github.com/cloudyr/aws.signature
 BugReports: https://github.com/cloudyr/aws.signature/issues
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.2

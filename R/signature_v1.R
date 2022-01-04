@@ -48,19 +48,12 @@
 #' }
 #' @importFrom digest digest hmac
 #' @export
-signature_v4 <- 
-function(
-  secret = NULL,
-  date = format(Sys.time(), "%Y%m%d"),
-  region = NULL,
-  service,
-  string_to_sign,
-  verbose = getOption("verbose", FALSE)
-) {
-    kDate <- digest::hmac(paste0("AWS4", secret), date, "sha256", raw = TRUE)
-    kRegion <- digest::hmac(kDate, region, "sha256", raw = TRUE)
-    kService <- digest::hmac(kRegion, service, "sha256", raw = TRUE)
-    kSigning <- digest::hmac(kService, "aws4_request", "sha256", raw = TRUE)
-    signature <- digest::hmac(kSigning, string_to_sign, "sha256")
-    return(signature)
+signature_v1 <- function(secret = NULL,
+                         string_to_sign,
+                         verbose = getOption("verbose", FALSE)
+                         ) {
+  signature <- digest::hmac(secret, string_to_sign, algo = "sha1",
+                            serialize = FALSE, raw = TRUE)
+  sig_encoded <- base64enc::base64encode(signature)
+  return(sig_encoded)
 }

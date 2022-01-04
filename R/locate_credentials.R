@@ -3,7 +3,7 @@
 #' @description Locate AWS credentials from likely sources
 #' @param key An AWS Access Key ID
 #' @param secret An AWS Secret Access Key
-#' @param session_token Optionally, an AWS Security Token Service (STS) temporary Session Token
+#' @param security_token Optionally, an AWS Security Token Service (STS) temporary Session Token
 #' @param region A character string containing the AWS region for the request. If missing, \dQuote{us-east-1} is assumed.
 #' @param file A character string containing a path to a centralized \samp{.aws/credentials} file.
 #' @param profile A character string specifying which profile to use from the file. By default, the profile named in \env{AWS_PROFILE} is used, otherwise the \dQuote{default} profile is used.
@@ -12,7 +12,7 @@
 #' @details These functions locate values of AWS credentials (access key, secret access key, session token, and region) from likely sources. The order in which these are searched is as follows:
 #' \enumerate{
 #'   \item user-supplied values passed to the function
-#'   \item environment variables (\env{AWS_ACCESS_KEY_ID}, \env{AWS_SECRET_ACCESS_KEY}, \env{AWS_DEFAULT_REGION}, and \env{AWS_SESSION_TOKEN})
+#'   \item environment variables (\env{AWS_ACCESS_KEY_ID}, \env{AWS_SECRET_ACCESS_KEY}, \env{AWS_DEFAULT_REGION}, and \env{AWS_security_token})
 #'   \item an instance role (on the running ECS task from which this function is called) as identified by \code{\link[aws.ec2metadata]{metadata}}, if the aws.ec2metadata package is installed
 #'   \item an IAM instance role (on the running EC2 instance from which this function is called) as identified by \code{\link[aws.ec2metadata]{metadata}}, if the aws.ec2metadata package is installed
 #'   \item a profile in a local credentials dot file in the current working directory, using the profile specified by \env{AWS_PROFILE}
@@ -42,7 +42,7 @@ locate_credentials <-
 function(
   key = NULL,
   secret = NULL,
-  session_token = NULL,
+  security_token = NULL,
   region = NULL,
   file = Sys.getenv("AWS_SHARED_CREDENTIALS_FILE", default_credentials_file()),
   profile = NULL,
@@ -57,7 +57,7 @@ function(
     }
     
     # check for user-supplied values
-    user_supplied_values <- check_for_user_supplied_values(key, secret, region, session_token, default_region, verbose)
+    user_supplied_values <- check_for_user_supplied_values(key, secret, region, security_token, default_region, verbose)
     if (!is.null(user_supplied_values)){
       # early return
       return(user_supplied_values)
@@ -65,7 +65,7 @@ function(
 
     # Check for user-supplied profile
     if (credentials_feature_flag_on) {
-      user_supplied_profile <- check_for_user_supplied_profile(profile, file, region, session_token, default_region, verbose)
+      user_supplied_profile <- check_for_user_supplied_profile(profile, file, region, security_token, default_region, verbose)
       if (!is.null(user_supplied_profile)){
         # early return
         return(user_supplied_profile)
@@ -73,7 +73,7 @@ function(
     }
 
     # otherwise use environment variables if no user-supplied values
-    env_vars <- check_for_env_vars(region, file, default_region, session_token, verbose)
+    env_vars <- check_for_env_vars(region, file, default_region, security_token, verbose)
     if (!is.null(env_vars)){
       # early return
       return(env_vars)
@@ -108,7 +108,7 @@ function(
     region <- find_region_with_failsafe(region = region, default_region = default_region, verbose = verbose)
     
     # return identified values
-    return(list(key = key, secret = secret, session_token = session_token, region = region))
+    return(list(key = key, secret = secret, security_token = security_token, region = region))
 }
 
 check_ec2 <- function() {
@@ -167,7 +167,7 @@ function(
 ) {
     key <- NULL
     secret <- NULL
-    session_token <- NULL
+    security_token <- NULL
 
     if (!is.null(cred[["AWS_ACCESS_KEY_ID"]])) {
         key <- cred[["AWS_ACCESS_KEY_ID"]]
@@ -177,11 +177,11 @@ function(
         secret <- cred[["AWS_SECRET_ACCESS_KEY"]]
         vmsg(verbose, "Using value in credentials file for AWS Secret Access Key")
     }
-    if (!is.null(cred[["AWS_SESSION_TOKEN"]])) {
-        session_token <- cred[["AWS_SESSION_TOKEN"]]
+    if (!is.null(cred[["AWS_security_token"]])) {
+        security_token <- cred[["AWS_security_token"]]
         vmsg(verbose, "Using value in credentials file for AWS Session Token")
     } else {
-        session_token <- NULL
+        security_token <- NULL
     }
     # now find region, with fail safes (including credentials file)
     if (!is_blank(region)||(identical(region, "")&&getOption("cloudyr.aws.allow_empty_region", FALSE))) {
@@ -202,7 +202,7 @@ function(
     }
     
     # return values
-    return(list(key = key, secret = secret, session_token = session_token, region = region))
+    return(list(key = key, secret = secret, security_token = security_token, region = region))
 }
 
 find_region_with_failsafe <-
@@ -244,7 +244,7 @@ function(
   return(region)
 }
 
-check_for_user_supplied_values <- function(key, secret, region, session_token, default_region, verbose) {
+check_for_user_supplied_values <- function(key, secret, region, security_token, default_region, verbose) {
   if (isTRUE(verbose)) {
       message("Checking for credentials in user-supplied values")
   }
@@ -254,7 +254,7 @@ check_for_user_supplied_values <- function(key, secret, region, session_token, d
           message("Using user-supplied value for AWS Secret Access Key")
       }
       
-      if (!is_blank(session_token)) {
+      if (!is_blank(security_token)) {
           if (isTRUE(verbose)) {
               message("Using user-supplied value for AWS Session Token")
           }
@@ -262,13 +262,13 @@ check_for_user_supplied_values <- function(key, secret, region, session_token, d
       # now find region, with fail safes
       region <- find_region_with_failsafe(region = region, default_region = default_region, verbose = verbose)
       
-      return(list(key = key, secret = secret, session_token = session_token, region = region))
+      return(list(key = key, secret = secret, security_token = security_token, region = region))
   } else{
     return(NULL)
   }
 }
 
-check_for_user_supplied_profile <- function(profile, file, region, session_token, default_region, verbose) {
+check_for_user_supplied_profile <- function(profile, file, region, security_token, default_region, verbose) {
     if (is.null(profile)) {
         return(NULL)
     }
@@ -286,7 +286,7 @@ check_for_user_supplied_profile <- function(profile, file, region, session_token
     return(NULL)
 }
 
-check_for_env_vars <- function(region, file, default_region, session_token, verbose) {
+check_for_env_vars <- function(region, file, default_region, security_token, verbose) {
 
     if (isTRUE(verbose)) {
       message("Checking for credentials in Environment Variables")
@@ -297,17 +297,17 @@ check_for_env_vars <- function(region, file, default_region, session_token, verb
     env <- list(key = Sys.getenv("AWS_ACCESS_KEY_ID"),
                 secret = Sys.getenv("AWS_SECRET_ACCESS_KEY"),
                 profile = Sys.getenv("AWS_PROFILE"),
-                session_token = Sys.getenv("AWS_SESSION_TOKEN"),
+                security_token = Sys.getenv("AWS_security_token"),
                 region = Sys.getenv("AWS_DEFAULT_REGION"))
 
-    if (!is_blank(env$session_token)) {
-        session_token <- env$session_token
+    if (!is_blank(env$security_token)) {
+        security_token <- env$security_token
         if (isTRUE(verbose)) {
-            message("Using Environment Variable 'AWS_SESSION_TOKEN' for AWS Session Token")
+            message("Using Environment Variable 'AWS_security_token' for AWS Session Token")
         }
     } else {
-        if (!is_blank(session_token)) {
-            session_token <- session_token
+        if (!is_blank(security_token)) {
+            security_token <- security_token
             if (isTRUE(verbose)) {
                 message("Using user-supplied value for AWS Session Token")
             }
@@ -326,7 +326,7 @@ check_for_env_vars <- function(region, file, default_region, session_token, verb
         region <- find_region_with_failsafe(region = region, default_region = default_region, verbose = verbose)
         
         # early return
-        return(list(key = key, secret = secret, session_token = session_token, region = region))
+        return(list(key = key, secret = secret, security_token = security_token, region = region))
     } else if (!is_blank(env$profile)) {
         return(check_credentials_file(env$profile, file, region, default_region, verbose))
     }
@@ -346,7 +346,7 @@ check_ecs_metadata <- function(region, default_region, verbose){
         
         key <- ecs_meta[["AccessKeyId"]]
         secret <- ecs_meta[["SecretAccessKey"]]
-        session_token <- ecs_meta[["Token"]]
+        security_token <- ecs_meta[["Token"]]
         
         # now find region, with fail safes
         region <- find_region_with_failsafe(region = region,
@@ -356,7 +356,7 @@ check_ecs_metadata <- function(region, default_region, verbose){
         # early return
         return(list(key = key,
                     secret = secret,
-                    session_token = session_token,
+                    security_token = security_token,
                     region = region)
                )
       }
@@ -376,7 +376,7 @@ check_ec2_metadata <- function(region, default_region, verbose){
           }
           key <- role[["AccessKeyId"]]
           secret <- role[["SecretAccessKey"]]
-          session_token <- role[["Token"]]
+          security_token <- role[["Token"]]
           
           # now find region, with fail safes
           region <- find_region_with_failsafe(region = region,
@@ -384,7 +384,7 @@ check_ec2_metadata <- function(region, default_region, verbose){
                                               verbose = verbose,
                                               try_ec2 = TRUE)
           # early return
-          return(list(key = key, secret = secret, session_token = session_token, region = region))
+          return(list(key = key, secret = secret, security_token = security_token, region = region))
         }
     }
     return(NULL)
