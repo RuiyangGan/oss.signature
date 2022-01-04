@@ -25,17 +25,29 @@
 #' @seealso \code{\link{signature_v4}}, \code{\link{signature_v4_auth}}
 #' @export
 string_to_sign <- 
-function(algorithm = "AWS4-HMAC-SHA256",
-         datetime, # format(Sys.time(),"%Y%m%dT%H%M%SZ", tz = "UTC")
-         region,
-         service,
-         request_hash
+function(verb,
+         datetime, # format(Sys.time(),"a, %d %b %Y %H:%M:%S GMT", tz = "GMT")
+         bucket,
+         path,
+         headers,
+         query_args = NULL
          ) {
-    paste(algorithm,
-          datetime,
-          paste(substring(datetime,1,8),
-                region,
-                service,
-                "aws4_request", sep = "/"),
-          request_hash, sep = "\n")
+  resource_string <- get_resource_string(bucket = bucket,
+                                         path = path,
+                                         query_args = query_args)
+  headers_string <- get_headers_string(headers = headers)
+  content_md5 <- ifelse(
+    is.null(headers$`content-md5`), "", headers$`content-md5`)
+  content_type <- ifelse(
+    is.null(headers$`content-type`), "", headers$`content-type`)
+  d_timestamp <- format(datetime, "%a, %d %b %Y %H:%M:%S GMT", tz = "GMT")
+  sts <- paste(
+    verb,
+    content_md5,
+    content_type,
+    d_timestamp,
+    paste0(headers_string, resource_string),
+    sep = "\n"
+  )
+  return(sts)
 }

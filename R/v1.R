@@ -6,12 +6,11 @@
 #' @param verb A character string containing the HTTP verb being used in the request.
 #' @param action A character string containing the API endpoint used in the request.
 #' @param query_args A named list of character strings containing the query string values (if any) used in the API request, passed to \code{\link{canonical_request}}.
-#' @param canonical_headers A named list of character strings containing the headers used in the request.
 #' @param request_body The body of the HTTP request.
 #' @param signed_body Should the body be signed
 #' @template key
 #' @template secret
-#' @param session_token Optionally, an AWS Security Token Service (STS) temporary Session Token. This is added automatically as a header to \code{canonical_headers}. See \code{\link{locate_credentials}}.
+#' @param security_token Optionally, an AWS Security Token Service (STS) temporary security Token. This is added automatically as a header to \code{canonical_headers}. See \code{\link{locate_credentials}}.
 #' @param query A logical. Currently ignored.
 #' @param algorithm A character string containing the hashing algorithm used in the request. Should only be \dQuote{SHA256}.
 #' @template force_credentials
@@ -35,7 +34,7 @@
 #'     \item{SignatureHeader}{A character string containing a complete Authorization header value.}
 #'     \item{AccessKeyId}{A character string containing the access key id identified by \code{\link{locate_credentials}}.}
 #'     \item{SecretAccessKey}{A character string containing the secret access key identified by \code{\link{locate_credentials}}.}
-#'     \item{SessionToken}{A character string containing the session token identified by \code{\link{locate_credentials}}.}
+#'     \item{securityToken}{A character string containing the security token identified by \code{\link{locate_credentials}}.}
 #'     \item{Region}{A character string containing the region identified by \code{\link{locate_credentials}}.}
 #' 
 #' These values can either be used as query parameters in a REST-style API request, or as request headers. If authentication is supplied via query string parameters, the query string should include the following:
@@ -63,22 +62,20 @@
 #' \href{http://docs.aws.amazon.com/general/latest/gr/sigv4-add-signature-to-request.html}{Add the Signing Information to the Request}
 #' @seealso \code{\link{signature_v2_auth}}, \code{\link{locate_credentials}}
 #' @export
-signature_v4_auth <- 
+signature_v1_auth <- 
 function(
-  datetime = format(Sys.time(),"%Y%m%dT%H%M%SZ", tz = "UTC"),
-  region = NULL,
-  service,
+  datetime = Sys.time(),
   verb,
-  action,
+  region,
+  headers,
   query_args = list(),
-  canonical_headers, # named list
-  request_body,
-  signed_body = FALSE,
+  bucket = "",
+  path = "",
   key = NULL,
   secret = NULL,
-  session_token = NULL,
+  security_token = NULL,
   query = FALSE,
-  algorithm = "AWS4-HMAC-SHA256",
+  algorithm = "OSS",
   force_credentials = FALSE,
   verbose = getOption("verbose", FALSE)
 ){
@@ -90,7 +87,7 @@ function(
             if (!is.null(secret)) {
                 message("Using user-supplied value for AWS Secret Access Key")
             }
-            if (!is.null(session_token)) {
+            if (!is.null(security_token)) {
                 message("Using user-supplied value for AWS Secret Access Key")
             }
             if (!is.null(region)) {
@@ -98,73 +95,46 @@ function(
             }
         }
     } else {
-        credentials <- locate_credentials(key = key, secret = secret, session_token = session_token, region = region, verbose = verbose)
+        credentials <- locate_credentials(key = key, secret = secret, security_token = security_token, region = region, verbose = verbose)
         key <- credentials[["key"]]
         secret <- credentials[["secret"]]
-        session_token <- credentials[["session_token"]]
+        security_token <- credentials[["security_token"]]
         region <- credentials[["region"]]
     }
-    
-    date <- substring(datetime,1,8)
-    
     if (isTRUE(query)) {
         # handle query-based authorizations, by including relevant parameters
-    } 
-    
-    # Canonical Request
-    if (!is.null(session_token) && session_token != "") {
-        if (!missing(canonical_headers)) {
-            canonical_headers <- c(canonical_headers, list("X-Amz-Security-Token" = session_token))
-        } else {
-            canonical_headers <- list("X-Amz-Security-Token" = session_token)
-        }
     }
-    R <- canonical_request(verb = verb,
-                           canonical_uri = action,
-                           query_args = query_args,
-                           canonical_headers = canonical_headers,
-                           request_body = request_body,
-                           signed_body = signed_body)
-    
+    # Add security_token to headers
+    if (!is.null(security_token) && security_token != "") {
+      headers[["x-oss-security-token"]] <- security_token
+    }
     # String To Sign
-    S <- string_to_sign(algorithm = algorithm,
-                        datetime = datetime,
-                        region = region,
-                        service = service,
-                        request_hash = R$hash)
-    
+    S <- string_to_sign(
+      verb,
+      datetime,
+      bucket = bucket,
+      path = path,
+      headers = headers,
+      query_args = query_args
+    )
+
     # Signature
-    V4 <- signature_v4(secret = secret,
-                       date = date,
-                       region = region,
-                       service = service,
+    V1 <- signature_v1(secret = secret,
                        string_to_sign = S,
                        verbose = verbose)
-    
     # return list
-    credential <- paste(key, date, region, service, "aws4_request", sep="/")
-    sigheader <- paste(algorithm,
-                       paste(paste0("Credential=", credential),
-                             paste0("SignedHeaders=", R$headers),
-                             paste0("Signature=", V4),
-                             sep = ","))
+    sigheader <- sprintf(
+      "%s %s:%s", algorithm, key, V1
+    )
     structure(list(Algorithm = algorithm,
-                   Credential = credential,
-                   Date = date,
-                   SignedHeaders = R$headers,
-                   Body = request_body,
-                   BodyHash = R$body,
                    Verb = verb,
                    Query = query_args,
-                   Service = service,
-                   Action = action,
-                   CanonicalRequest = R$canonical,
                    StringToSign = S,
-                   Signature = V4,
+                   Signature = V1,
                    SignatureHeader = sigheader,
                    AccessKeyId = key,
                    SecretAccessKey = secret,
-                   SessionToken = session_token,
-                   Region = region), class = "aws_signature_v4")
+                   securityToken = security_token),
+              class = "oss_signature")
 }
 

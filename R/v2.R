@@ -140,7 +140,7 @@ function(
                    Signature = sig_encoded,
                    AccessKeyId = credentials[["key"]],
                    SecretAccessKey = credentials[["secret"]],
-                   SessionToken = credentials[["session_token"]],
+                   SessionToken = credentials[["security_token"]],
                    Region = credentials[["region"]]),
               class = "aws_signature_v2")
 }
