@@ -2,7 +2,7 @@
 % Please edit documentation in R/locate_credentials.R
 \name{locate_credentials}
 \alias{locate_credentials}
-\title{Locate AWS Credentials}
+\title{Locate OSS Credentials}
 \usage{
 locate_credentials(
   key = NULL,
@@ -16,9 +16,9 @@ locate_credentials(
 )
 }
 \arguments{
-\item{key}{An AWS Access Key ID}
+\item{key}{一个OSS AccessKeyId}
 
-\item{secret}{An AWS Secret Access Key}
+\item{secret}{一个OSS AccessKeySecret}
 
 \item{security_token}{Optionally, an AWS Security Token Service (STS) temporary Session Token}
 
@@ -33,7 +33,7 @@ locate_credentials(
 \item{verbose}{A logical indicating whether to be verbose.}
 }
 \description{
-Locate AWS credentials from likely sources
+Locate OSS credentials from likely sources
 }
 \details{
 These functions locate values of AWS credentials (access key, secret access key, session token, and region) from likely sources. The order in which these are searched is as follows:
