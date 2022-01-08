@@ -1,8 +1,8 @@
 #' @rdname locate_credentials
-#' @title Locate AWS Credentials
-#' @description Locate AWS credentials from likely sources
-#' @param key An AWS Access Key ID
-#' @param secret An AWS Secret Access Key
+#' @title Locate OSS Credentials
+#' @description Locate OSS credentials from likely sources
+#' @param key 一个OSS AccessKeyId
+#' @param secret 一个OSS AccessKeySecret
 #' @param security_token Optionally, an AWS Security Token Service (STS) temporary Session Token
 #' @param region A character string containing the AWS region for the request. If missing, \dQuote{us-east-1} is assumed.
 #' @param file A character string containing a path to a centralized \samp{.aws/credentials} file.

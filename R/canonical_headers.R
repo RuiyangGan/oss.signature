@@ -1,3 +1,11 @@
+#' 生成需要计算签名的请求头字符串
+#'
+#' @description 生成需要计算签名的请求头字符串
+#' @param headers 一个named list of character string, 包含所有在请求中的头文件信息
+#' @details 需要计算签名的请求头为CanonicalizedOSSHeaders, 所有以x-oss-为前缀的HTTP Header被称为CanonicalizedOSSHeaders
+#' @references \href{https://help.aliyun.com/document_detail/31951.html#title-wbj-1a2-eyc}{CanonicalizedOSSHeaders构建方式}
+#' @return 一个需要包括在签名计算中的请求头字符串, 编码为UTF-8
+#' @export
 get_headers_string <- function(headers) {
   canon_headers <- list()
   headers_keys <- names(headers)

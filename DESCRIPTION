@@ -1,23 +1,26 @@
 Package: oss.signature
 Type: Package
-Title: Amazon Web Services Request Signatures
+Title: Aliyun Object Storage Service (OSS) Signatures
 Version: 0.6.0
 Date: 2020-06-01
-Authors@R: c(person("Thomas J.", "Leeper",
+Authors@R: c(
+             person("Ruiyang", "Gan",
                     role = c("aut"),
-                    email = "thosjleeper@gmail.com",
-                    comment = c(ORCID = "0000-0003-4097-6326")),
+                    email = "ganruiyang@metrodata.cn"),
+             person("Thomas J.", "Leeper",
+                    role = c("aut"),
+                    email = "thosjleeper@gmail.com"),
              person("Jonathan", "Stott", email = "jonathan.stott@magairports.com", role = c("cre", "aut")),
              person("Mike", "Kaminsky", email = "kaminsky.michael@gmail.com", role = "ctb")
             )
-Description: Generates version 2 and version 4 request signatures for Amazon Web Services ('AWS') <https://aws.amazon.com/> Application Programming Interfaces ('APIs') and provides a mechanism for retrieving credentials from environment variables, 'AWS' credentials files, and 'EC2' instance metadata. For use on 'EC2' instances, users will need to install the suggested package 'aws.ec2metadata' <https://cran.r-project.org/package=aws.ec2metadata>.
+Description: Generates request signatures for Aliyun Object Storage Service ('OSS') <https://www.aliyun.com/product/oss/> Application Programming Interfaces ('APIs') and provides a mechanism for retrieving credentials from environment variables, 'OSS' credentials files.
 License: GPL (>= 2)
 Imports:
     digest,
     base64enc
 Suggests:
-    testthat (>= 2.1.0),
-    aws.ec2metadata (>= 0.1.6)
-URL: https://github.com/cloudyr/aws.signature
-BugReports: https://github.com/cloudyr/aws.signature/issues
+    testthat (>= 2.1.0)
+URL: 
+BugReports: 
 RoxygenNote: 7.1.2
+Encoding: UTF-8
