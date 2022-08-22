@@ -1,12 +1,12 @@
 Package: oss.signature
 Type: Package
 Title: Aliyun Object Storage Service (OSS) Signatures
-Version: 0.0.0-9000
+Version: 0.0.1
 Date: 2020-06-01
 Authors@R: c(
              person("Ruiyang", "Gan",
                     role = c("aut"),
-                    email = "ganruiyang@metrodata.cn"),
+                    email = "ganruiyang@outlook.com"),
              person("Thomas J.", "Leeper",
                     role = c("aut"),
                     email = "thosjleeper@gmail.com"),
