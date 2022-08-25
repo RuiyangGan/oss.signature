@@ -1,7 +1,7 @@
 Package: oss.signature
 Type: Package
 Title: Aliyun Object Storage Service (OSS) Signatures
-Version: 0.0.1
+Version: 0.0.2
 Date: 2020-06-01
 Authors@R: c(
              person("Ruiyang", "Gan",
