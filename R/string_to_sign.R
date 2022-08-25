@@ -40,6 +40,8 @@ function(verb,
     is.null(headers$`content-md5`), "", headers$`content-md5`)
   content_type <- ifelse(
     is.null(headers$`content-type`), "", headers$`content-type`)
+  # Set time locale to C
+  invisible(Sys.setlocale("LC_TIME", "C"))
   d_timestamp <- format(datetime, "%a, %d %b %Y %H:%M:%S GMT", tz = "GMT")
   sts <- paste(
     verb,
